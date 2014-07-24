@@ -70,21 +70,22 @@ class WordFrequency(object):
         ]
 
         # Map chunks of words for processing
-        words = []
-        results = thread_pool.map(chunker, words, file_parts)
+        wordset = thread_pool.map(chunker, file_parts)
 
         # Reduce results set to final required output
-        frequency = reducer(results, frequency)
+        frequency = reducer(wordset, frequency)
 
         return frequency
 
 
-def chunker(words, file_path):
+def chunker(file_path):
     """
     Read a block of lines from a file
     :param file_path:
     :return:
     """
+    words = []
+
     with open(file_path, 'r') as file_object:
         for word in file_object:
             word = word.strip()
@@ -95,14 +96,15 @@ def chunker(words, file_path):
     return words
 
 
-def reducer(words, frequency):
+def reducer(wordset, frequency):
     """
     reduces words to final output frequency list
-    :param words:
+    :param wordset:
     :param frequency:
     :return: dict of unique words and their frequencies
     """
-    for word in words:
-        frequency[word] += 1
+    for words in wordset:
+        for word in words:
+            frequency[word] += 1
 
     return frequency
