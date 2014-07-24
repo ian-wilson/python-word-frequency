@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
+from itertools import chain
 import multiprocessing
 
 
@@ -72,8 +73,11 @@ class WordFrequency(object):
         # Map chunks of words for processing
         wordset = thread_pool.map(chunker, file_parts)
 
+        # Flatten the list of lists to a list of words using fast itertools
+        words = list(chain.from_iterable(wordset))
+
         # Reduce results set to final required output
-        frequency = reducer(wordset, frequency)
+        frequency = reducer(words, frequency)
 
         return frequency
 
@@ -96,15 +100,14 @@ def chunker(file_path):
     return words
 
 
-def reducer(wordset, frequency):
+def reducer(words, frequency):
     """
     reduces words to final output frequency list
-    :param wordset:
+    :param words:
     :param frequency:
     :return: dict of unique words and their frequencies
     """
-    for words in wordset:
-        for word in words:
-            frequency[word] += 1
+    for word in words:
+        frequency[word] += 1
 
     return frequency
